@@ -18,15 +18,30 @@ def to_torch(feed_dict):
     annot_ids = feed_dict.pop('annot_id')
   for k, v in feed_dict.items():
     if 'embed' in k:
-      torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False).cuda().float()
+      if torch.cuda.is_available():
+        torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False).cuda().float()
+      else:
+        torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False).float()
     elif 'token_bio' == k:
-      torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False).cuda().float()
+      if torch.cuda.is_available():
+        torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False).cuda().float()
+      else:
+        torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False).float()
     elif 'y' == k or k == 'mention_start_ind' or k == 'mention_end_ind' or 'length' in k:
-      torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False).cuda()
+      if torch.cuda.is_available():
+        torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False).cuda()
+      else:
+        torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False)
     elif k == 'span_chars':
-      torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False).cuda()
+      if torch.cuda.is_available():
+        torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False).cuda()
+      else:
+        torch_feed_dict[k] = torch.autograd.Variable(torch.from_numpy(v), requires_grad=False)
     else:
-      torch_feed_dict[k] = torch.from_numpy(v).cuda()
+      if torch.cuda.is_available():
+        torch_feed_dict[k] = torch.from_numpy(v).cuda()
+      else:
+        torch_feed_dict[k] = torch.from_numpy(v)
   return torch_feed_dict, annot_ids
 
 

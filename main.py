@@ -103,7 +103,8 @@ def _train(args):
   tensorboard = TensorboardWriter(train_log, validation_log)
 
   model = models.Model(args, constant.ANSWER_NUM_DICT[args.goal])
-  model.cuda()
+  if torch.cuda.is_available():
+    model.cuda()
   total_loss = 0
   batch_num = 0
   start_time = time.time()
@@ -199,7 +200,10 @@ def load_model(reload_model_name, save_dir, model_id, model, optimizer=None):
     model_file_name = '{0:s}/{1:s}.pt'.format(save_dir, reload_model_name)
   else:
     model_file_name = '{0:s}/{1:s}.pt'.format(save_dir, model_id)
-  checkpoint = torch.load(model_file_name)
+  if torch.cuda.is_available():
+    checkpoint = torch.load(model_file_name)
+  else:
+    checkpoint = torch.load(model_file_name, map_location="cpu")
   model.load_state_dict(checkpoint['state_dict'])
   if optimizer:
     optimizer.load_state_dict(checkpoint['optimizer'])
@@ -225,7 +229,8 @@ def _test(args):
   test_fname = args.eval_data
   data_gens = get_datasets([(test_fname, 'test', args.goal)], args)
   model = models.Model(args, constant.ANSWER_NUM_DICT[args.goal])
-  model.cuda()
+  if torch.cuda.is_available():
+    model.cuda()
   model.eval()
   load_model(args.reload_model_name, constant.EXP_ROOT, args.model_id, model)
 
@@ -263,7 +268,8 @@ def _test(args):
 
 if __name__ == '__main__':
   config = config_parser.parser.parse_args()
-  torch.cuda.manual_seed(config.seed)
+  if torch.cuda.is_available():
+    torch.cuda.manual_seed(config.seed)
   logging.basicConfig(
     filename=constant.EXP_ROOT +"/"+ config.model_id + datetime.datetime.now().strftime("_%m-%d_%H") + config.mode + '.txt',
     level=logging.INFO, format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M')
