@@ -270,6 +270,8 @@ if __name__ == '__main__':
   config = config_parser.parser.parse_args()
   if torch.cuda.is_available():
     torch.cuda.manual_seed(config.seed)
+  else:
+    torch.manual_seed(config.seed)
   logging.basicConfig(
     filename=constant.EXP_ROOT +"/"+ config.model_id + datetime.datetime.now().strftime("_%m-%d_%H") + config.mode + '.txt',
     level=logging.INFO, format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s', datefmt='%m-%d %H:%M')
