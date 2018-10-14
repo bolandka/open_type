@@ -26,12 +26,14 @@ def macro(true_and_prediction):
       pred_label_count += len(predicted_labels)
       per_p = len(set(predicted_labels).intersection(set(true_labels))) / float(len(predicted_labels))
       p += per_p
-    if len(true_labels):
+    if len(true_labels) > 0:
       gold_label_count += 1
       per_r = len(set(predicted_labels).intersection(set(true_labels))) / float(len(true_labels))
       r += per_r
+  precision = 0
   if pred_example_count > 0:
     precision = p / pred_example_count
+  recall = 0
   if gold_label_count > 0:
     recall = r / gold_label_count
   avg_elem_per_pred = pred_label_count / pred_example_count
@@ -53,7 +55,10 @@ def micro(true_and_prediction):
   if pred_example_count == 0:
     return num_examples, 0, 0, 0, 0, 0
   precision = num_correct_labels / num_predicted_labels
-  recall = num_correct_labels / num_true_labels
+  try:
+    recall = num_correct_labels / num_true_labels
+  except ZeroDivisionError as e:
+    recall = 0
   avg_elem_per_pred = num_predicted_labels / pred_example_count
   return num_examples, pred_example_count, avg_elem_per_pred, precision, recall, f1(precision, recall)
 
@@ -76,5 +81,8 @@ def mrr(dist_list, gold):
         if sorted_index[k] == gold_i_where_i:
           rr_per_array.append(1.0 / (k + 1))
     mrr_per_example.append(np.mean(rr_per_array))
-  return sum(mrr_per_example) * 1.0 / len(mrr_per_example)
+  try:
+    return sum(mrr_per_example) * 1.0 / len(mrr_per_example)
+  except ZeroDivisionError as e:
+    return 0
 
